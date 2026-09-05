@@ -2,78 +2,84 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>محاكي الشركة - لوحة البنك</title>
-    <!-- استدعاء مكتبة MQTT للاتصال اللحظي -->
+    <title>محاكي الشركة - لوحة التحكم الرئيسية</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; text-align: center; margin: 0; padding: 50px; }
-        .card { background: #1e293b; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        input { width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; text-align: center; }
-        button { background: #3b82f6; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 85%; }
+        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; text-align: center; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto 30px auto; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: right; }
+        .card h3 { margin-top: 0; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .value { font-size: 24px; font-weight: bold; color: #10b981; margin: 15px 0; }
+        .auth-box { background: #1e293b; max-width: 500px; margin: 0 auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        input { width: 70%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; font-size: 16px; text-align: center; }
+        button { background: #3b82f6; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
         button:hover { background: #2563eb; }
-        .hidden { display: none; }
-        .money { font-size: 28px; color: #10b981; font-weight: bold; margin: 20px 0; }
+        .locked { color: #f59e0b; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <!-- قسم تسجيل الدخول برمز الـ 6 أرقام -->
-        <div id="login-section">
-            <h2>تسجيل دخول البنك</h2>
-            <p>أدخل كود الربط المكون من 6 أرقام الظهور لك داخل اللعبة:</p>
-            <input type="text" id="auth-code" placeholder="123456" maxlength="6">
-            <br>
-            <button onclick="loginToBank()">ربط ودخول</button>
+    <h1>لوحة تحكم محاكي الشركة</h1>
+    <p>استعرض الشركات، الفواتير، ونظام البنك العام. اربط حسابك لتحديث الأرصدة لحظياً.</p>
+
+    <!-- الواجهة الأساسية تظهر للجميع فور الدخول -->
+    <div class="dashboard">
+        <div class="card">
+            <h3>🏢 نظام الشركات</h3>
+            <p>إدارة الشركات التابعة ومستوى التطوير.</p>
+            <div class="value">3 شركات نشطة</div>
+            <span class="locked">🔒 تتطلب ربط الحساب للتحكم</span>
         </div>
 
-        <!-- لوحة معلومات البنك (تظهر بعد تسجيل الدخول) -->
-        <div id="bank-section" class="hidden">
-            <h2>حساب الشركة البنكي</h2>
-            <p id="player-name">جاري الاتصال...</p>
-            <div class="money" id="balance-display">$0</div>
-            <button onclick="depositMoney()">إيداع / تحديث الرصيد</button>
+        <div class="card">
+            <h3>🏦 رصيد البنك</h3>
+            <p>إجمالي رأس المال والأرباح الحالية.</p>
+            <div class="value" id="balance-display">$-- (غير مربوط)</div>
+            <span class="locked">🔒 تتطلب ربط الحساب لتحديثه</span>
         </div>
+
+        <div class="card">
+            <h3>⚡ فواتير الكهرباء</h3>
+            <p>حالة استهلاك الطاقة والمستحقات.</p>
+            <div class="value" style="color: #ef4444;">$450 / شهرياً</div>
+            <span class="locked">🔒 تتطلب ربط الحساب للسداد</span>
+        </div>
+    </div>
+
+    <!-- قسم تسجيل الدخول وربط الحساب -->
+    <div class="auth-box" id="auth-section">
+        <h3>ربط الحساب باللعبة</h3>
+        <p>أدخل كود الربط المكون من 6 أرقام من داخل لعبة روبلوكس لتفعيل المزامنة:</p>
+        <input type="text" id="auth-code" placeholder="123456" maxlength="6">
+        <br>
+        <button onclick="linkGameAccount()">ربط الحساب الآن</button>
     </div>
 
     <script>
         let client;
-        
-        function loginToBank() {
+
+        function linkGameAccount() {
             const code = document.getElementById('auth-code').value;
             if (code.length !== 6) {
-                alert('الرجاء إدخال كود صحيح من 6 أرقام');
+                alert('الرجاء إدخال كود صالح من 6 أرقام');
                 return;
             }
 
-            // الاتصال بسيرفر MQTT (استبدل البيانات بما يناسب سيرفرك)
             client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
 
             client.on('connect', function () {
-                console.log('تم الاتصال بالسيرفر بنجاح');
-                // الاشتراك بقناة خاصة بهذا الكود
+                console.log('متصل بالسيرفر بنجاح');
                 client.subscribe('company/sim/bank/' + code);
                 
-                // اخفاء صفحة الدخول وإظهار البنك
-                document.getElementById('login-section').classList.add('hidden');
-                document.getElementById('bank-section').classList.remove('hidden');
-                document.getElementById('player-name').innerText = 'تم الربط بنجاح (كود: ' + code + ')';
+                document.getElementById('auth-section').innerHTML = '<h3 style="color: #10b981;">تم ربط الحساب بنجاح!</h3><p>المزامنة الحية مفعلة الآن للكود: ' + code + '</p>';
             });
 
             client.on('message', function (topic, payload) {
-                // استلام تحديثات الفلوس لحظياً من اللعبة
                 const data = JSON.parse(payload.toString());
                 if(data.balance !== undefined) {
                     document.getElementById('balance-display').innerText = '$' + data.balance;
                 }
             });
-        }
-
-        function depositMoney() {
-            if(client && client.connected) {
-                // إرسال أمر أو تحديث للسيرفر إذا لزم الأمر
-                alert('تم إرسال طلب التحديث بنجاح');
-            }
         }
     </script>
 
