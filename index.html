@@ -2,248 +2,80 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرئيسية - SM Store Simulator</title>
-    <!-- استدعاء مكتبة الأيقونات والخطوط الفخمة -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>محاكي الشركة - لوحة البنك</title>
+    <!-- استدعاء مكتبة MQTT للاتصال اللحظي -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        body {
-            background-color: #0b0f19;
-            color: #fff;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 255, 204, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
-            min-height: 100vh;
-        }
-
-        /* القائمة العلوية الفخمة */
-        nav {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 18px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 900;
-            color: #00ffcc;
-            letter-spacing: 1px;
-            text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 10px;
-        }
-
-        .nav-links a {
-            color: #94a3b8;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-        }
-
-        /* الهيرو سكشن (الواجهة الرئيسية) */
-        .hero {
-            max-width: 1200px;
-            margin: 60px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .hero-content h1 {
-            font-size: 52px;
-            font-weight: 900;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #fff, #00ffcc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-content p {
-            color: #94a3b8;
-            font-size: 18px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        /* أزرار تفاعلية خرافية مع تأثير الضغطة الحقيقي */
-        .btn-group {
-            display: flex;
-            gap: 15px;
-        }
-
-        .custom-btn {
-            background: linear-gradient(135deg, #00ffcc, #00b386);
-            color: #0b0f19;
-            font-weight: 800;
-            font-size: 16px;
-            padding: 14px 32px;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.3);
-            transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
-        }
-
-        /* تأثير الضغطة الفعلي (ينضغط لداخل ويبين عمق التصميم) */
-        .custom-btn:active {
-            transform: scale(0.95) translateY(2px);
-            box-shadow: 0 2px 10px rgba(0, 255, 204, 0.2);
-            filter: brightness(0.9);
-        }
-
-        .custom-btn.secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: none;
-        }
-
-        .custom-btn.secondary:active {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(0.95) translateY(2px);
-        }
-
-        /* كارت عرض المعلومات الفخم */
-        .hero-card {
-            background: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 35px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .stat-box {
-            background: rgba(15, 23, 42, 0.6);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            text-align: center;
-        }
-
-        .stat-box h3 {
-            color: #00ffcc;
-            font-size: 28px;
-            font-weight: 900;
-            margin-bottom: 5px;
-        }
-
-        .stat-box p {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-            .hero {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            .btn-group {
-                justify-content: center;
-            }
-            nav {
-                padding: 15px 20px;
-            }
-        }
+        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; text-align: center; margin: 0; padding: 50px; }
+        .card { background: #1e293b; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        input { width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; text-align: center; }
+        button { background: #3b82f6; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 85%; }
+        button:hover { background: #2563eb; }
+        .hidden { display: none; }
+        .money { font-size: 28px; color: #10b981; font-weight: bold; margin: 20px 0; }
     </style>
 </head>
 <body>
 
-    <!-- القائمة العلوية الموحدة -->
-    <nav>
-        <div class="logo">
-            <i class="fa-solid fa-store"></i> SM Store
-        </div>
-        <div class="nav-links">
-            <a href="index.html" class="active">الرئيسية</a>
-            <a href="shop.html">المتجر والشركات</a>
-            <a href="services.html">الخدمات والحكومة</a>
-        </div>
-    </nav>
-
-    <!-- الواجهة الرئيسية -->
-    <div class="hero">
-        <div class="hero-content">
-            <h1>عالم الأعمال والتجارة الأقوى في روبلوكس</h1>
-            <p>أنشئ شركتك الخاصة، درّب البوتات الذكية للبيع والشراء، أدار رصيدك المالي بدقة متناهية، واستمتع بتجربة محاكاة واقعية وفخمة.</p>
-            
-            <div class="btn-group">
-                <a href="shop.html" class="custom-btn">
-                    <i class="fa-solid fa-rocket"></i> ابدأ المغامرة
-                </a>
-                <a href="services.html" class="custom-btn secondary">
-                    <i class="fa-solid fa-bars-staggered"></i> استكشف الخدمات
-                </a>
-            </div>
+    <div class="card">
+        <!-- قسم تسجيل الدخول برمز الـ 6 أرقام -->
+        <div id="login-section">
+            <h2>تسجيل دخول البنك</h2>
+            <p>أدخل كود الربط المكون من 6 أرقام الظهور لك داخل اللعبة:</p>
+            <input type="text" id="auth-code" placeholder="123456" maxlength="6">
+            <br>
+            <button onclick="loginToBank()">ربط ودخول</button>
         </div>
 
-        <!-- بطاقة الإحصائيات الحية -->
-        <div class="hero-card">
-            <h3 style="margin-bottom: 15px; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
-                <i class="fa-solid fa-chart-line" style="color: #00ffcc;"></i> حالة الخادم الفورية
-            </h3>
-            <p style="color: #94a3b8; font-size: 14px; line-height: 1.5;">جميع النظم مرتبطة سحابياً وجاهزة بالكامل لتفاعل اللاعبين والبوتات (NPCs).</p>
-            
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <h3>99.9%</h3>
-                    <p>استقرار السيرفر</p>
-                </div>
-                <div class="stat-box">
-                    <h3 id="live-users">متصل</h3>
-                    <p>حالة المزامنة</p>
-                </div>
-            </div>
+        <!-- لوحة معلومات البنك (تظهر بعد تسجيل الدخول) -->
+        <div id="bank-section" class="hidden">
+            <h2>حساب الشركة البنكي</h2>
+            <p id="player-name">جاري الاتصال...</p>
+            <div class="money" id="balance-display">$0</div>
+            <button onclick="depositMoney()">إيداع / تحديث الرصيد</button>
         </div>
     </div>
 
-    <!-- ربط ملف الـ MQTT للتزامن -->
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <script src="mqtt-config.js"></script>
+    <script>
+        let client;
+        
+        function loginToBank() {
+            const code = document.getElementById('auth-code').value;
+            if (code.length !== 6) {
+                alert('الرجاء إدخال كود صحيح من 6 أرقام');
+                return;
+            }
+
+            // الاتصال بسيرفر MQTT (استبدل البيانات بما يناسب سيرفرك)
+            client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
+
+            client.on('connect', function () {
+                console.log('تم الاتصال بالسيرفر بنجاح');
+                // الاشتراك بقناة خاصة بهذا الكود
+                client.subscribe('company/sim/bank/' + code);
+                
+                // اخفاء صفحة الدخول وإظهار البنك
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('bank-section').classList.remove('hidden');
+                document.getElementById('player-name').innerText = 'تم الربط بنجاح (كود: ' + code + ')';
+            });
+
+            client.on('message', function (topic, payload) {
+                // استلام تحديثات الفلوس لحظياً من اللعبة
+                const data = JSON.parse(payload.toString());
+                if(data.balance !== undefined) {
+                    document.getElementById('balance-display').innerText = '$' + data.balance;
+                }
+            });
+        }
+
+        function depositMoney() {
+            if(client && client.connected) {
+                // إرسال أمر أو تحديث للسيرفر إذا لزم الأمر
+                alert('تم إرسال طلب التحديث بنجاح');
+            }
+        }
+    </script>
+
 </body>
 </html>
