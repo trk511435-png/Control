@@ -2,7 +2,7 @@ const brokerUrl = "wss://7f9dc9fedda84268a977070b2dfd69af.s1.eu.hivemq.cloud:888
 const options = {
   clientId: "sm_store_web_" + Math.random().toString(16).substring(2, 8),
   username: "S",
-  password: "sss435738", // أو كلمة المرور الجديدة لو غيرتها في Access Management
+  password: "sss435738",
   clean: true,
   connectTimeout: 4000
 };
