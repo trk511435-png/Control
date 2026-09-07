@@ -1,27 +1,16 @@
-// بيانات الاتصال بسيرفر HiveMQ Cloud
-const brokerUrl = "wss://27cbafbb229748d8ab7a3a77f06867e5.s1.eu.hivemq.cloud:8884/mqtt"; // استخدام منفذ الـ WebSocket الآمن
+// بيانات الاتصال بسيرفر HiveMQ Cloud المشتركة لكل صفحات SM Store
+const brokerUrl = "wss://27cbafbb229748d8ab7a3a77f06867e5.s1.eu.hivemq.cloud:8884/mqtt";
 const options = {
-  clientId: "web_client_" + Math.random().toString(16.substring(2, 8)),
+  clientId: "sm_store_web_" + Math.random().toString(16).substring(2, 8),
   username: "S",
   password: "sss435738",
   clean: true,
   connectTimeout: 4000
 };
 
-// الاتصال بالسيرفر
-const client = mqtt.connect(brokerUrl, options);
+// إنشاء الاتصال الموحد
+const mqttClient = mqtt.connect(brokerUrl, options);
 
-client.on("connect", () => {
-  console.log("تم الاتصال بنجاح بسيرفر HiveMQ السحابي!");
-  // الاشتراك في قناة معينة لتلقي التحديثات
-  client.subscribe("sm-store/updates", (err) => {
-    if (!err) {
-      console.log("تم الاشتراك في القناة بنجاح");
-    }
-  });
-});
-
-client.on("message", (topic, payload) => {
-  // استقبال البيانات وتحديث واجهة الموقع فوراً
-  console.log("رسالة جديدة من القناة " + topic + ": " + payload.toString());
+mqttClient.on("connect", () => {
+  console.log("تم الاتصال بنجاح بسيرفر HiveMQ السحابي لـ SM Store!");
 });
