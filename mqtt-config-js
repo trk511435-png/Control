@@ -1,16 +1,14 @@
-// بيانات الاتصال بسيرفر HiveMQ Cloud المشتركة لكل صفحات SM Store
-const brokerUrl = "wss://27cbafbb229748d8ab7a3a77f06867e5.s1.eu.hivemq.cloud:8884/mqtt";
+const brokerUrl = "wss://7f9dc9fedda84268a977070b2dfd69af.s1.eu.hivemq.cloud:8884/mqtt";
 const options = {
   clientId: "sm_store_web_" + Math.random().toString(16).substring(2, 8),
   username: "S",
-  password: "sss435738",
+  password: "sss435738", // أو كلمة المرور الجديدة لو غيرتها في Access Management
   clean: true,
   connectTimeout: 4000
 };
 
-// إنشاء الاتصال الموحد
 const mqttClient = mqtt.connect(brokerUrl, options);
 
 mqttClient.on("connect", () => {
-  console.log("تم الاتصال بنجاح بسيرفر HiveMQ السحابي لـ SM Store!");
+  console.log("تم الاتصال بنجاح بسيرفر HiveMQ السحابي الجديد لـ SM Store!");
 });
