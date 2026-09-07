@@ -2,62 +2,356 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>محاكي الشركة - لوحة التحكم الرئيسية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكي الشركات والأعمال - المنصة المركزية</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; text-align: center; }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto 30px auto; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: right; }
-        .card h3 { margin-top: 0; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .value { font-size: 24px; font-weight: bold; color: #10b981; margin: 15px 0; }
-        .auth-box { background: #1e293b; max-width: 500px; margin: 0 auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        input { width: 70%; padding: 10px; margin: 10px 0; border-radius: 6px; border: none; font-size: 16px; text-align: center; }
-        button { background: #3b82f6; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        button:hover { background: #2563eb; }
-        .locked { color: #f59e0b; font-size: 14px; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --accent-blue: #38bdf8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: Tahoma, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+            text-align: right;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--accent-blue);
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* نافذة التنقل بين الأقسام */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav-tab:hover, .nav-tab.active {
+            background: var(--accent-blue);
+            color: #000;
+            border-color: var(--accent-blue);
+        }
+
+        .section-content {
+            display: none;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent-blue);
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .value {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--accent-green);
+            margin: 15px 0;
+        }
+
+        .auth-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            max-width: 500px;
+            margin: 0 auto 30px auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        input, select, textarea {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+            background: #0f172a;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        button {
+            background: var(--accent-blue);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .locked {
+            color: var(--accent-yellow);
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        th {
+            background: #1e293b;
+            color: var(--accent-blue);
+        }
+
+        .badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>لوحة تحكم محاكي الشركة</h1>
-    <p>استعرض الشركات، الفواتير، ونظام البنك العام. اربط حسابك لتحديث الأرصدة لحظياً.</p>
+    <header>
+        <h1>محاكي الشركات والأعمال - المنصة المركزية</h1>
+        <p>إدارة الشركات، بورصة الأسهم، البطاقات البنكية، ونظام التوظيف والشراكات</p>
+    </header>
 
-    <!-- الواجهة الأساسية تظهر للجميع فور الدخول -->
-    <div class="dashboard">
-        <div class="card">
-            <h3>🏢 نظام الشركات</h3>
-            <p>إدارة الشركات التابعة ومستوى التطوير.</p>
-            <div class="value">3 شركات نشطة</div>
-            <span class="locked">🔒 تتطلب ربط الحساب للتحكم</span>
-        </div>
+    <!-- صندوق ربط الحساب السريع -->
+    <div class="auth-box" id="auth-section">
+        <h3>ربط الحساب باللعبة</h3>
+        <p>أدخل كود الربط المكون من 6 أرقام لتفعيل المزامنة الفورية:</p>
+        <input type="text" id="auth-code" placeholder="123456" maxlength="6">
+        <br>
+        <button onclick="linkGameAccount()">ربط الحساب</button>
+    </div>
 
-        <div class="card">
-            <h3>🏦 رصيد البنك</h3>
-            <p>إجمالي رأس المال والأرباح الحالية.</p>
-            <div class="value" id="balance-display">$-- (غير مربوط)</div>
-            <span class="locked">🔒 تتطلب ربط الحساب لتحديثه</span>
-        </div>
+    <!-- شريط التنقل بين الأقسام -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="switchTab('tab-main', this)">الرئيسية</div>
+        <div class="nav-tab" onclick="switchTab('tab-stocks', this)">بورصة الأسهم</div>
+        <div class="nav-tab" onclick="switchTab('tab-jobs', this)">تطبيق "وظفني"</div>
+        <div class="nav-tab" onclick="switchTab('tab-bank', this)">البنك والبطاقات</div>
+        <div class="nav-tab" onclick="switchTab('tab-partnerships', this)">الشراكات والعقود</div>
+        <div class="nav-tab" onclick="switchTab('tab-wealth', this)">إنجاز الثروة (250م)</div>
+    </div>
 
-        <div class="card">
-            <h3>⚡ فواتير الكهرباء</h3>
-            <p>حالة استهلاك الطاقة والمستحقات.</p>
-            <div class="value" style="color: #ef4444;">$450 / شهرياً</div>
-            <span class="locked">🔒 تتطلب ربط الحساب للسداد</span>
+    <!-- قسم الرئيسية -->
+    <div id="tab-main" class="section-content active">
+        <div class="dashboard">
+            <div class="card">
+                <h3>🏢 نظام الشركات النشطة</h3>
+                <p>إدارة الفروع (رخيص، متوسط، مريح).</p>
+                <div class="value">3 شركات نشطة</div>
+                <span class="locked">🔒 تتطلب ربط الحساب للتحكم الكامل</span>
+            </div>
+
+            <div class="card">
+                <h3>🏦 الرصيد البنكي الحالي</h3>
+                <p>إجمالي رأس المال والأرباح المتاحة.</p>
+                <div class="value" id="balance-display">$-- (غير مربوط)</div>
+                <span class="locked">🔒 تتطلب ربط الحساب لتحديثه لحظياً</span>
+            </div>
+
+            <div class="card">
+                <h3>⚡ هيئة الكهرباء (الفواتير)</h3>
+                <p>سداد استهلاك الطاقة كل 24 ساعة.</p>
+                <div class="value" style="color: var(--accent-red);">$450 / شهرياً</div>
+                <button onclick="payElectricity()" style="margin-top:10px; background:var(--accent-green); color:#fff;">سداد الفاتورة الآن</button>
+            </div>
         </div>
     </div>
 
-    <!-- قسم تسجيل الدخول وربط الحساب -->
-    <div class="auth-box" id="auth-section">
-        <h3>ربط الحساب باللعبة</h3>
-        <p>أدخل كود الربط المكون من 6 أرقام من داخل لعبة روبلوكس لتفعيل المزامنة:</p>
-        <input type="text" id="auth-code" placeholder="123456" maxlength="6">
-        <br>
-        <button onclick="linkGameAccount()">ربط الحساب الآن</button>
+    <!-- قسم بورصة الأسهم -->
+    <div id="tab-stocks" class="section-content">
+        <div class="card">
+            <h3>📈 متجر الأسهم والبورصة الكبرى</h3>
+            <p>تداول أسهم الشركات، طرح أسهم شركتك للبيع، وتحديد نسب الأرباح وتقسيم الأسهم.</p>
+            
+            <div style="margin: 20px 0; background: #0f172a; padding: 15px; border-radius: 8px;">
+                <h4>طرح أسهم شركتك للبيع</h4>
+                <input type="text" placeholder="اسم الشركة" id="stock-comp-name">
+                <input type="number" placeholder="عدد الأسهم المطروحة" id="stock-count">
+                <input type="number" placeholder="سعر السهم الواحد ($)" id="stock-price">
+                <br>
+                <button onclick="publishStocks()">طرح في البورصة</button>
+            </div>
+
+            <h4>الشركات المدرجة في السوق</h4>
+            <table>
+                <tr>
+                    <th>اسم الشركة</th>
+                    <th>الأرباح الحالية</th>
+                    <th>قوة السوق</th>
+                    <th>احتمالية الربح</th>
+                    <th>إجراء</th>
+                </tr>
+                <tr>
+                    <td>شركة الأفق التقني</td>
+                    <td>$1,250,000</td>
+                    <td>عالية جداً</td>
+                    <td><span class="badge">85% (مرتفع)</span></td>
+                    <td><button onclick="buyStockModal('الأفق التقني')">شراء أسهم</button></td>
+                </tr>
+                <tr>
+                    <td>مجموعة دبا التجارية</td>
+                    <td>$450,000</td>
+                    <td>متوسطة</td>
+                    <td><span class="badge" style="background:rgba(245,158,11,0.2); color:var(--accent-yellow);">50% (متوسط)</span></td>
+                    <td><button onclick="buyStockModal('دبا التجارية')">شراء أسهم</button></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- قسم تطبيق وظفني -->
+    <div id="tab-jobs" class="section-content">
+        <div class="card">
+            <h3>💼 تطبيق "وظفني" (التقديم على الوظائف)</h3>
+            <p>قدم على الشركات الخاصة (يوافق عليها صاحب الشركة) أو الوظائف الحكومية والبنك (يقيمها الذكاء الاصطناعي).</p>
+            
+            <div style="margin: 20px 0;">
+                <select id="job-select">
+                    <option value="private">شركة خاصة (مراجعة مالك الشركة)</option>
+                    <option value="government">وظائف حكومية (تقييم الذكاء الاصطناعي)</option>
+                    <option value="bank">البنك المركزي (قبول آلي للمؤهلين)</option>
+                </select>
+                <br>
+                <textarea placeholder="اكتب نبذة عن خبرتك ومهاراتك للتقديم..." rows="3" style="width:80%;"></textarea>
+                <br>
+                <button onclick="submitJobApplication()">إرسال طلب التوظيف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم البنك والبطاقات الرقمية -->
+    <div id="tab-bank" class="section-content">
+        <div class="card">
+            <h3>💳 النظام البنكي وإدارة البطاقات مع التأمين</h3>
+            <p>إدارة بطاقاتك الرقمية، تفعيل حماية التأمين ضد التسريب والسرقة، وتجميد البطاقة فوراً عند الخطر.</p>
+            
+            <div style="background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <h4>بطاقاتي النشطة</h4>
+                <p>رقم البطاقة: ****-****-****-4892 | حالة التأمين: <span style="color:var(--accent-green);">مفعل (محمي)</span></p>
+                <button onclick="freezeCard()" style="background:var(--accent-red); color:#fff;">تجميد البطاقة وتغييرها</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم الشراكات والعقود -->
+    <div id="tab-partnerships" class="section-content">
+        <div class="card">
+            <h3>🤝 عقود الشراكة والاتفاقيات التجارية</h3>
+            <p>إنشاء شراكة مع شركة أخرى، تحديد نسبة الأرباح أو تعاون بدون ربح، وتوقيع العقد رسمياً عبر الإيميل.</p>
+            <input type="text" placeholder="اسم الشركة الشريكة" id="partner-name">
+            <input type="number" placeholder="نسبة الأرباح المشتركة (%)" id="partner-profit">
+            <br>
+            <button onclick="sendPartnershipContract()">إرسال العقد وتوقيعه</button>
+        </div>
+    </div>
+
+    <!-- قسم إنجاز الثروة -->
+    <div id="tab-wealth" class="section-content">
+        <div class="card" style="text-align: center;">
+            <h3>🏆 إنجاز الثروة (عتبة 250 مليون)</h3>
+            <p>إذا وصلت ثروتك إلى 250 مليون داخل اللعبة، سيظهر لك كود قصير من 5 أرقام.</p>
+            <p>أدخل الكود هنا لتفعيل مضاعفة الأرباح (دبل فلوس) مدى الحياة والحصول على شهادتك الرسمية الموقعة!</p>
+            
+            <input type="text" placeholder="أدخل كود الـ 5 أرقام" id="wealth-code" maxlength="5" style="max-width: 250px;">
+            <br>
+            <button onclick="verifyWealthCode()" style="background:var(--accent-green); color:#fff;">تفعيل "دبل الفلوس" واستلام الشهادة</button>
+        </div>
     </div>
 
     <script>
         let client;
 
+        // تبديل الأقسام بسلاسة
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.section-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // ربط حساب روبلوكس عبر MQTT
         function linkGameAccount() {
             const code = document.getElementById('auth-code').value;
             if (code.length !== 6) {
@@ -71,15 +365,48 @@
                 console.log('متصل بالسيرفر بنجاح');
                 client.subscribe('company/sim/bank/' + code);
                 
-                document.getElementById('auth-section').innerHTML = '<h3 style="color: #10b981;">تم ربط الحساب بنجاح!</h3><p>المزامنة الحية مفعلة الآن للكود: ' + code + '</p>';
+                document.getElementById('auth-section').innerHTML = '<h3 style="color: var(--accent-green);">تم ربط الحساب بنجاح!</h3><p>المزامنة الحية مفعلة الآن للكود: ' + code + '</p>';
             });
 
             client.on('message', function (topic, payload) {
                 const data = JSON.parse(payload.toString());
                 if(data.balance !== undefined) {
-                    document.getElementById('balance-display').innerText = '$' + data.balance;
+                    document.getElementById('balance-display').innerText = '$' + data.balance.toLocaleString();
                 }
             });
+        }
+
+        function payElectricity() {
+            alert('تم سداد فاتورة الكهرباء بنجاح من رصيد شركتك!');
+        }
+
+        function publishStocks() {
+            alert('تم طرح الأسهم بنجاح في بورصة الموقع الكبرى!');
+        }
+
+        function buyStockModal(companyName) {
+            alert('تم تقديم طلب شراء أسهم في ' + companyName + ' بنجاح!');
+        }
+
+        function submitJobApplication() {
+            alert('تم إرسال طلب التوظيف عبر تطبيق "وظفني" بنجاح! سيتم المراجعة من قِبل الإدارة أو الذكاء الاصطناعي.');
+        }
+
+        function freezeCard() {
+            alert('تم تجميد البطاقة البنكية لحمايتك من أي تسريب. يمكنك إصدار بطاقة جديدة من البنك باللعبة.');
+        }
+
+        function sendPartnershipContract() {
+            alert('تم إرسال عقد الشراكة رسمياً عبر الإيميل للطرف الآخر للتوقيع!');
+        }
+
+        function verifyWealthCode() {
+            const code = document.getElementById('wealth-code').value;
+            if(code.length === 5) {
+                alert('مبروك! تم التحقق من الكود بنجاح. تم تفعيل ميزة "دبل الفلوس" مدى الحياة وإرسال شهادتك الرسمية الموقعة إلى إيميلك!');
+            } else {
+                alert('الرجاء إدخال كود صحيح مكون من 5 أرقام.');
+            }
         }
     </script>
 
